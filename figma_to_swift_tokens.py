@@ -46,66 +46,112 @@ def parse_color_ref(value: str) -> str:
             swift_parts.append(capitalize_first_letter(part))
     return ".".join(swift_parts)
 
+def get_struct_and_proto_name(name, parent):
+    """
+    Return (struct_name, proto_name) for a node named `name` whose parent is `parent`.
+    parent is the parent's JSON key (string) or None for top-level.
+    """
+    cap = capitalize_first_letter(name)
+    struct_name = cap
+    proto_name = f"AB{cap}ColorProtocol"
+
+    # Top-level special cases
+    if parent is None:
+        if name == "background":
+            return "Background", "ABBackgroundColorProtocol"
+        if name == "chart":
+            return "Chart", "ABChartColorProtocol"
+
+    # Background variant nodes (danger, warning, success, information)
+    if parent == "background" and name in ["danger", "warning", "success", "information"]:
+        return struct_name, "ABBackgroundVariantProtocol"
+
+    # Background brand special-case
+    if parent == "background" and name == "brand":
+        return "Brand", "ABBackgroundBrandProtocol"
+
+    # Chart series nodes (series01..series06 and neutral) under chart
+    if parent == "chart" and name.startswith("series"):
+        return struct_name, "ABChartSeriesColorProtocol"
+    if parent == "chart" and name == "neutral":
+        return struct_name, "ABChartSeriesColorProtocol"
+
+    # Bold-like nodes under a series should use the chart-series-bold protocol
+    if parent and parent.startswith("series") and name in ["bold", "bolder", "boldest"]:
+        return struct_name, "ABChartSeriesBoldColorProtocol"
+
+    # Fallback default (AB{Cap}ColorProtocol)
+    return struct_name, proto_name
+
+
 def generate_tokens_swift(data: dict) -> str:
     lines = header()
     lines.append("public struct ABThemeColors: ABThemeColorProtocol {")
 
-    def recurse(node: dict, name: str, depth: int = 0, parent: str = None):
-        capitalizedName = capitalize_first_letter(name)
-        struct_name = capitalizedName
-        proto_name = f"AB{capitalizedName}ColorProtocol"
-        # Handle background variants
-        if parent == "background" and name in ["danger", "warning", "success", "information"]:
-            proto_name = "ABBackgroundVariantProtocol"
-
-        elif parent == "background" and name == "brand":
-            struct_name = "Brand"
-            proto_name = "ABBackgroundBrandProtocol"
-
-        # Handle chart's series bold background variants
-        elif name in ["bold", "bolder", "boldest"] and parent.startswith("series"):
-            proto_name = "ABChartSeriesBoldColorProtocol"
-
-        # Handle chart series
-        elif parent == "chart":
-            proto_name = "ABChartSeriesColorProtocol"
-
+    def recurse(node: dict, name: str, depth: int = 1, parent: str = None):
+        # Use helper to determine exact struct + proto for this node
+        struct_name, proto_name = get_struct_and_proto_name(name, parent)
         indent = "    " * depth
         print(f"{indent}Generating {name}: {GREEN}struct {struct_name}: {proto_name}{RESET}")
-        lines.append(f"\n{indent}public let {name}: {proto_name} = {struct_name}() ")
-        lines.append(f"{indent}public struct {struct_name}: {proto_name} {{")
-        for key, val in node.items():
-            swift_key = camel_case(key)
 
+        # start struct body
+        lines.append(f"\n{indent}public struct {struct_name}: {proto_name} {{")
+
+        # prepare items (optionally sort chart series)
+        items = list(node.items())
+        if name == "chart":
+            def chart_key(item):
+                k, _ = item
+                if k.startswith("series"):
+                    suffix = k.replace("series", "")
+                    try:
+                        return (0, int(suffix))
+                    except:
+                        return (0, 999)
+                if k == "neutral":
+                    return (1, 0)
+                return (2, k)
+            items.sort(key=chart_key)
+
+        props = []
+        nested = []
+
+        for key, val in items:
+            swift_key = camel_case(key)
             if isinstance(val, dict) and "$value" in val:
                 swift_value = parse_color_ref(val["$value"])
-                lines.append(f"{indent}    public var {swift_key}: UIColor {{ {swift_value} }}")
+                props.append(f"{indent}    public var {swift_key}: UIColor {{ {swift_value} }}")
             elif isinstance(val, dict):
-                recurse(val, key, depth + 1, parent=name)
-                # if parent == "background" and name in ["danger", "warning", "success", "information"]:
-                #     lines.append(f"{indent}    public var {swift_key}: UIColor {{ UIColor.clear }} // adjust mapping")
-                # else:
-                #     nested_struct = f"AB{key.capitalize()}Color"
-                #     nested_proto = f"AB{key.capitalize()}ColorProtocol"
-                #     lines.append(f"{indent}    public let {swift_key} = {nested_struct}() ")
+                # get child struct/proto names correctly
+                child_struct, child_proto = get_struct_and_proto_name(key, name)
+                props.append(f"{indent}    public let {swift_key}: {child_proto} = {child_struct}() ")
+                nested.append((key, val))
 
+        # write grouped props (vars + child let declarations)
+        lines.extend(props)
+
+        # recurse and append nested struct definitions AFTER props
+        for key, val in nested:
+            recurse(val, key, depth + 1, parent=name)
+
+        # close struct
         lines.append(f"{indent}}}")
 
-    # top-level categories under "color"
-    for key, val in data["color"].items():
-        print(f"Generating {GREEN}{key}{RESET}:")
-        recurse(val, key, 1)
-        capitalizedKey = capitalize_first_letter(key)
-        struct_name = f"AB{capitalizedKey}Color"
-        proto_name = f"AB{capitalizedKey}ColorProtocol"
-        if key == "background":
-            proto_name = "ABBackgroundColorProtocol"
-            struct_name = "ABBackgroundColor"
-        elif key == "chart":
-            proto_name = "ABChartColorProtocol"
-            struct_name = "ABChartColor"
-        # lines.append(f"    public var {camel_case(key)}: {proto_name} {{ {struct_name}() }}")
-        # lines.append("}")
+    # Top-level public let declarations grouped at the top of ABThemeColors
+    top_level_keys = list(data["color"].items())
+
+    # (optional) if you want deterministic top-level ordering, you can sort here:
+    # desired_order = ["text", "icon", "background", "chart"]
+    # top_level_keys.sort(key=lambda kv: desired_order.index(kv[0]) if kv[0] in desired_order else 99)
+
+    for key, val in top_level_keys:
+        struct_name, proto_name = get_struct_and_proto_name(key, None)
+        print(f"Generating {GREEN}{key}: {proto_name} = {struct_name}(){RESET}")
+        lines.append(f"    public let {camel_case(key)}: {proto_name} = {struct_name}()")
+
+    # Now append the actual struct bodies for each top-level key
+    for key, val in top_level_keys:
+        recurse(val, key, depth=1, parent=None)
 
     lines.append("}")
     return "\n".join(lines)
