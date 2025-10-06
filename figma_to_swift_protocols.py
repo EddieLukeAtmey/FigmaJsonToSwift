@@ -5,7 +5,6 @@ import getpass
 import shutil
 from datetime import datetime
 from pathlib import Path
-from figma_to_swift_tokens import generate_tokens_swift
 from figma_to_swift_tokens import camel_case
 
 def generate_protocols(data):
@@ -42,6 +41,8 @@ public protocol ABBackgroundBrandProtocol: ABBackgroundVariantProtocol {
             proto.append("    var `default`: UIColor { get }")
             proto.append("    var view: UIColor { get }")
             proto.append("    var backdrop: UIColor { get }")
+            proto.append("    var container: UIColor { get }")
+            proto.append("    var overlay: UIColor { get }")
             proto.append("    var brand: ABBackgroundBrandProtocol { get }")
             proto.append("    var danger: ABBackgroundVariantProtocol { get }")
             proto.append("    var warning: ABBackgroundVariantProtocol { get }")
@@ -106,9 +107,8 @@ def main():
     protocols_content += generate_protocols(data)
 
     Path("ABColorProtocols.swift").write_text(protocols_content)
-    Path("ABColorTokens.swift").write_text(generate_tokens_swift(data))
 
-    print(f"Generated ABColorProtocols.swift and ABColorTokens.swift")
+    print(f"Generated ABColorProtocols.swift")
     # cleanup __pycache__
     if os.path.exists("__pycache__"):
         shutil.rmtree("__pycache__")

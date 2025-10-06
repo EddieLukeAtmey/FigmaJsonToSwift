@@ -3,19 +3,19 @@
     "text": {
       "default": {
         "$type": "color",
-        "$value": "{Color.gray.900}"
+        "$value": "{Color.gray.50}"
       },
       "subtle": {
         "$type": "color",
-        "$value": "{Color.gray.600}"
+        "$value": "{Color.gray.300}"
       },
       "inverse": {
         "$type": "color",
-        "$value": "{Color.white.100%}"
+        "$value": "{Color.black.100%}"
       },
       "brand": {
         "$type": "color",
-        "$value": "{Color.brand.600}"
+        "$value": "#a27327"
       },
       "danger": {
         "$type": "color",
@@ -35,21 +35,21 @@
       },
       "subtlest": {
         "$type": "color",
-        "$value": "{Color.gray.400}"
+        "$value": "{Color.gray.500}"
       },
       "disable": {
         "$type": "color",
-        "$value": "{Color.gray.200}"
+        "$value": "{Color.gray.700}"
       }
     },
     "icon": {
       "brand": {
         "$type": "color",
-        "$value": "{Color.brand.600}"
+        "$value": "#a27327"
       },
       "default": {
         "$type": "color",
-        "$value": "{Color.gray.500}"
+        "$value": "{Color.gray.400}"
       },
       "danger": {
         "$type": "color",
@@ -69,33 +69,33 @@
       },
       "subtle": {
         "$type": "color",
-        "$value": "{Color.gray.400}"
+        "$value": "{Color.gray.500}"
       },
       "disabled": {
         "$type": "color",
-        "$value": "{Color.gray.200}"
+        "$value": "{Color.gray.700}"
       },
       "inverse": {
         "$type": "color",
-        "$value": "{Color.white.100%}"
+        "$value": "{Color.black.100%}"
       },
       "on-background": {
         "$type": "color",
-        "$value": "{Color.gray.900}"
+        "$value": "{Color.gray.50}"
       },
       "brandselect": {
         "$type": "color",
-        "$value": "{Color.brand.300}"
+        "$value": "#cba971"
       }
     },
     "background": {
       "disabled": {
         "$type": "color",
-        "$value": "{Color.gray.100}"
+        "$value": "{Color.gray.800}"
       },
       "default": {
         "$type": "color",
-        "$value": "{Color.white.100%}"
+        "$value": "{Color.black.100%}"
       },
       "danger": {
         "default": {
@@ -180,29 +180,29 @@
       "brand": {
         "default": {
           "$type": "color",
-          "$value": "{Color.brand.50}"
+          "$value": "#f7f2ea"
         },
         "pressed": {
           "$type": "color",
-          "$value": "{Color.brand.100}"
+          "$value": "#e7d7bd"
         },
         "bold": {
           "default": {
             "$type": "color",
-            "$value": "{Color.brand.600}"
+            "$value": "#a27327"
           },
           "pressed": {
             "$type": "color",
-            "$value": "{Color.brand.700}"
+            "$value": "#7e591f"
           }
         },
         "container": {
           "$type": "color",
-          "$value": "{Color.brand.50}"
+          "$value": "{Color.white.10%}"
         },
         "container-light": {
           "$type": "color",
-          "$value": "{Color.brand.50}"
+          "$value": "{Color.white.20%}"
         }
       },
       "backdrop": {
@@ -211,37 +211,37 @@
       },
       "view": {
         "$type": "color",
-        "$value": "{Color.gray.50}"
+        "$value": "{Color.gray.900}"
       },
       "onsurface": {
         "$type": "color",
-        "$value": "{Color.white.100%}"
+        "$value": "{Color.white.10%}"
       },
       "bold": {
         "$type": "color",
-        "$value": "{Color.gray.900}"
+        "$value": "{Color.gray.800}"
       },
       "container": {
         "$type": "color",
-        "$value": "{Color.white.100%}"
+        "$value": "{Color.gray.900}"
       },
       "overlay": {
         "$type": "color",
-        "$value": "{Color.white.80%}"
+        "$value": "{Color.white.10%}"
       }
     },
     "border": {
       "default": {
         "$type": "color",
-        "$value": "{Color.gray.100}"
+        "$value": "{Color.gray.800}"
       },
       "disabled": {
         "$type": "color",
-        "$value": "{Color.gray.200}"
+        "$value": "{Color.gray.700}"
       },
       "brand": {
         "$type": "color",
-        "$value": "{Color.brand.600}"
+        "$value": "#a27327"
       },
       "danger": {
         "$type": "color",
@@ -261,7 +261,7 @@
       },
       "inverse": {
         "$type": "color",
-        "$value": "{Color.white.100%}"
+        "$value": "{Color.black.100%}"
       }
     },
     "chart": {
@@ -493,11 +493,11 @@
     "shadow": {
       "onbg": {
         "$type": "color",
-        "$value": "{Color.black.10%}"
+        "$value": "{Color.white.10%}"
       },
       "navigationbars": {
         "$type": "color",
-        "$value": "{Color.black.20%}"
+        "$value": "{Color.white.20%}"
       }
     }
   }

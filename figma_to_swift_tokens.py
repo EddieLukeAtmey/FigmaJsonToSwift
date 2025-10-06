@@ -84,9 +84,9 @@ def get_struct_and_proto_name(name, parent):
     return struct_name, proto_name
 
 
-def generate_tokens_swift(data: dict) -> str:
+def generate_tokens_swift(fileName: str, data: dict) -> str:
     lines = header()
-    lines.append("public struct ABThemeColors: ABThemeColorProtocol {")
+    lines.append(f"public struct {fileName}: ABThemeColorProtocol {{")
 
     def recurse(node: dict, name: str, depth: int = 1, parent: str = None):
         # Use helper to determine exact struct + proto for this node
@@ -157,20 +157,23 @@ def generate_tokens_swift(data: dict) -> str:
     return "\n".join(lines)
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python figma_to_swift_tokens.py <json_file>")
-        sys.exit(1)
+    script_dir = Path(__file__).parent
 
-    json_file = sys.argv[1]
+    for json_path in script_dir.glob("*.json"):
+        with open(json_path, "r") as f:
+            data = json.load(f)
 
-    with open(json_file, "r") as f:
-        data = json.load(f)
+        file_name = capitalize_first_letter(json_path.stem)  # filename without extension
+        swift_class_name = f"AB{fileName}ThemeColors.swift"
+        output_file = script_dir / swift_class_name
 
-    Path("ABColorTokens.swift").write_text(generate_tokens_swift(data))
+        output_file.write_text(generate_tokens_swift(swift_class_name, data))
+        print(f"Generated: {output_file}")
 
     # cleanup __pycache__
-    if os.path.exists("__pycache__"):
-        shutil.rmtree("__pycache__")
+    pycache = script_dir / "__pycache__"
+    if pycache.exists():
+        shutil.rmtree(pycache)
 
 if __name__ == "__main__":
     main()
